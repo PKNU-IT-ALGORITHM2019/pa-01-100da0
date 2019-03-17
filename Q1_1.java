@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.util.Scanner;
 public class Q1_1 {
 
-		static String [] words=new String[500000];
-		static String [] terms=new String[500000];
+		static String [] words=new String[500000];   // 단어+설명  저장
+		static String [] terms=new String[500000];   // 단어만 저장
 		static int N=0;
 		
 		public static void main(String [] args) {
@@ -26,14 +26,23 @@ public class Q1_1 {
 				}
 				
 				else if(command.equals("find")) {
-					String str=kb.next();
+					String str=kb.nextLine().substring(1);
 					int n = findWord(str);
 					if(n > 0) 
 						System.out.println("Found "+ n +" items.");
 						
 					else System.out.println("Not found.");
 					
+					String []sign= { " ","-","'"};	 //기호가 있는지 확인
+					int T =0;
+					for(int i=0;i<3;i++) {
+						if(str.contains(sign[i])) 
+							T =1;	
+					}
+					if(T==0)
 					findPrint(findIndex(str+" ",0,N-1),n);		
+					
+					else findPrint(findIndexsign(str+" ",0,N-1),n);	
 				}
 				
 				else if(command.equals("size")) {		
@@ -72,8 +81,7 @@ public class Q1_1 {
 		        }
 		}
 		
-		static void addWord( String str) {
-			
+		static void addWord( String str) {			
 			String str2 = str;
 			String[] arr= str2.split("\\(");
 			words[N] = str;
@@ -87,25 +95,47 @@ public class Q1_1 {
 		static int findWord(String str) {     //같은단어개수
 			int result = 0;
 			for(int i=0;i<N;i++)
-				if(terms[i].equalsIgnoreCase(str+" ")) result++;
+				if(terms[i].equalsIgnoreCase(str + " ")) result++;		
 			return result;
 		}
+
 		
-		static int findIndex(String str,int begin, int end) {   //이진검색		
+		static int findIndex(String str,int begin, int end) {   //단어에 기호없을때 이진검색		
 			if (begin > end) {
 		         if(end >= 0)   return end;
 		         else         return -1;
 		      }
 			else {
 				int middle =(begin+end)/2;
-	            int compResult = str.compareToIgnoreCase(terms[middle]);
-				if(compResult == 0) return middle;
-				else if(compResult<0) return  findIndex(str,begin,middle-1 );	
-				else return  findIndex(str,middle+1,end);
+					 int compResult2 = str.compareToIgnoreCase(terms[middle]);
+						if(compResult2 == 0) return middle;
+			            else if(compResult2<0) return  findIndex(str,begin,middle-1 );	
+						else return  findIndex(str,middle+1,end);	
+				}
+				
+			}
+		
+
+		static int findIndexsign(String str,int begin, int end) {   //단어에 기호 있을때 이진검색		
+			if (begin > end) {
+		         if(end >= 0)   return end;
+		         else         return -1;
+		      }
+			else {
+				int middle =(begin+end)/2;
+				String str2=str.replaceAll(" ",""); //공백제거
+				String terms2=terms[middle].replaceAll(" ", "");
+				String str3=str2.replaceAll("'","");    //어퍼스트로피제거
+				String terms3=terms2.replaceAll("'", "");				
+				String str4=str3.replaceAll("-","");    //-제거
+				String terms4=terms3.replaceAll("-", ""); 				
+	            int compResult2 = str4.compareToIgnoreCase(terms4);
+				if(compResult2 == 0) return middle;
+	            else if(compResult2<0) return  findIndexsign(str,begin,middle-1 );	
+				else return findIndexsign(str,middle+1,end);	
+				
 			}
 		}
-
-		
 
 		static void findPrint(int p,int q) {  //p=인덱스값,q=갯수
 			if(q==0 && p >= N-1) {	       //찾는 단어가 없고, 뒤에있는단어가 존재하지않음
@@ -121,7 +151,7 @@ public class Q1_1 {
 				System.out.println("- - -");
 				System.out.println(words[p+1]);
 			}
-			else   {   //찾는 단어가 있음
+			else   {                     //찾는 단어가 있음
 				if( p-q <0) {           //앞 쪽에 있을때
 					for(int i=0;i<p+q;i++) {
 						if(terms[p].equalsIgnoreCase(terms[i]))
@@ -136,8 +166,10 @@ public class Q1_1 {
 				}
 				else {
 				for(int i=p-q;i<p+q;i++) {             //중간에 있을 때
-					if(terms[p].equalsIgnoreCase(terms[i]))
-					System.out.println(words[i]);
+					if(terms[p].equalsIgnoreCase(terms[i])) {
+						System.out.println(words[i]);
+					}
+					
 				}	
 				}
 		}
